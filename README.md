@@ -38,7 +38,7 @@ Most Quran packages are heavy or require network downloads. This package is full
 - Fully customizable builders
 - 60fps smooth rendering
 
----
+------
 
 ### 📖 2. Vertical Reading Mode
 - Surah-based scrollable list
