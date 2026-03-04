@@ -1,7 +1,7 @@
 name: qcf_quran_lite
 description: Lightweight offline Quran package with Hafs font.
 homepage: https://github.com/hussein12347/qcf_quran_lite/?tab=readme-ov-file
-
+publish_to: "https://pub.dev"
 version: 0.0.1
 
 environment:
