@@ -30,7 +30,10 @@ Most Quran packages are heavy or require network downloads. This package is full
 - Remove diacritics & normalize text helpers  
 - High-performance: smooth scrolling, 60fps  
 - Light & dark mode compatible  
-- Minimal app size (~15MB)  
+- Minimal app size (~15MB)
+
+---
+
 ### 📜 1. Authentic Mushaf PageView (604 Pages)
 - Real Madinah Mushaf layout
 - PageController support
