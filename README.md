@@ -1,0 +1,1 @@
+# qcf_quran_lite
