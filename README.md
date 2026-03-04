@@ -1,35 +1,9 @@
-qcf_quran_lite 📖
-
-A highly performant, lightweight, and fully customizable Flutter package for building professional Quran applications. It provides offline Quranic data (Othmanic text), advanced search capabilities, rich metadata, and production-ready reading UI components.
-
-📸 Screenshots
-
-(Note: Replace these URLs with your actual repository image links once uploaded to GitHub)
-
-<p align="center"> <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DClassic%2BMushaf%2BView" width="250" alt="Mushaf View"> &nbsp;&nbsp;&nbsp;&nbsp; <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DCustom%2BList%2BView%2B(Audio%2BSync)" width="250" alt="List View"> &nbsp;&nbsp;&nbsp;&nbsp; <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DSmart%2BSearch%2BEngine" width="250" alt="Search"> </p>
-
-🚀 Getting Started
-
-Add qcf_quran_lite to your pubspec.yaml:
-
-dependencies:
+qcf_quran_lite 📖A highly performant, lightweight, and fully customizable Flutter package for building professional Quran applications. It provides offline Quranic data (Othmanic text), advanced search capabilities, rich metadata, and production-ready reading UI components.📸 Screenshots(Note: Replace these URLs with your actual repository image links once uploaded to GitHub)<p align="center"> <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DClassic%2BMushaf%2BView" width="250" alt="Mushaf View"> &nbsp;&nbsp;&nbsp;&nbsp; <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DCustom%2BList%2BView%2B(Audio%2BSync)" width="250" alt="List View"> &nbsp;&nbsp;&nbsp;&nbsp; <img src="https://www.google.com/search?q=https://via.placeholder.com/250x500.png%3Ftext%3DSmart%2BSearch%2BEngine" width="250" alt="Search"> </p>🚀 Getting StartedAdd qcf_quran_lite to your pubspec.yaml:dependencies:
   qcf_quran_lite: ^latest_version
   # Required if you want to use the Auto-Scrolling/Audio Sync feature in List View
   scrollable_positioned_list: ^0.3.8 
-
-
-Then, import the package in your Dart code:
-
-import 'package:qcf_quran_lite/qcf_quran_lite.dart';
-
-
-✨ Features & Usage Guide
-
-1. Classic Mushaf Mode (QuranPageView)
-
-Display the Quran in the classic page-by-page layout exactly like the printed Mushaf. It supports swipe gestures, page tracking, and a high-performance verse highlighting system.
-
-final ValueNotifier<List<HighlightVerse>> _highlights = ValueNotifier([]);
+Then, import the package in your Dart code:import 'package:qcf_quran_lite/qcf_quran_lite.dart';
+✨ Features & Usage Guide1. Classic Mushaf Mode (QuranPageView)Display the Quran in the classic page-by-page layout exactly like the printed Mushaf. It supports swipe gestures, page tracking, and a high-performance verse highlighting system.final ValueNotifier<List<HighlightVerse>> _highlights = ValueNotifier([]);
 final PageController _pageController = PageController(initialPage: 0);
 
 QuranPageView(
@@ -53,24 +27,12 @@ QuranPageView(
     ];
   },
 )
-
-
-2. List Reading Mode (QuranSurahListView)
-
-Ideal for Tafseer views, translations, or reading verse-by-verse. It renders a specific Surah as a vertical list.
-
-QuranSurahListView(
+2. List Reading Mode (QuranSurahListView)Ideal for Tafseer views, translations, or reading verse-by-verse. It renders a specific Surah as a vertical list.QuranSurahListView(
   surahNumber: 1, // Al-Fatihah
   highlightsNotifier: _highlights,
   ayahStyle: TextStyle(fontSize: 24, color: Colors.black),
 )
-
-
-3. Audio Synchronization & Auto-Scrolling
-
-QuranSurahListView natively supports programmatic scrolling (via scrollable_positioned_list). This makes it incredibly easy to sync the UI with an audio player.
-
-final ItemScrollController _itemScrollController = ItemScrollController();
+3. Audio Synchronization & Auto-ScrollingQuranSurahListView natively supports programmatic scrolling (via scrollable_positioned_list). This makes it incredibly easy to sync the UI with an audio player.final ItemScrollController _itemScrollController = ItemScrollController();
 
 // 1. Attach the controller to the view
 QuranSurahListView(
@@ -88,13 +50,7 @@ void syncWithAudio(int currentPlayingAyah) {
     alignment: 0.3, // Keeps the playing Ayah near the top-center of the screen
   );
 }
-
-
-4. Ultimate Customization (Custom Builders)
-
-You don't have to stick to the default look. You can completely change how headers and Ayahs look by providing your own widgets.
-
-QuranSurahListView(
+4. Ultimate Customization (Custom Builders)You don't have to stick to the default look. You can completely change how headers and Ayahs look by providing your own widgets.QuranSurahListView(
   surahNumber: 1,
   
   // Custom Surah Header (e.g., with an Image Frame)
@@ -135,13 +91,7 @@ QuranSurahListView(
     );
   },
 )
-
-
-5. Smart Search Engine
-
-The package includes a highly optimized search function. It automatically normalizes Arabic text (removes Tashkeel, normalizes variations of Alef, Taa Marbuta, etc.) to guarantee 100% accurate results regardless of how the user types.
-
-// 1. Clean the user input
+5. Smart Search EngineThe package includes a highly optimized search function. It automatically normalizes Arabic text (removes Tashkeel, normalizes variations of Alef, Taa Marbuta, etc.) to guarantee 100% accurate results regardless of how the user types.// 1. Clean the user input
 String query = normalise("الرّحْمَٰن"); 
 
 // 2. Search the database
@@ -153,13 +103,7 @@ List<Map> results = List<Map>.from(searchResults['result']);
 for (var result in results) {
   print("Found in Surah: ${result['sora']}, Ayah: ${result['aya_no']}");
 }
-
-
-6. Reactive Highlighting System
-
-Easily manage temporary or permanent highlights without triggering full UI rebuilds.
-
-// Add a new highlight
+6. Reactive Highlighting SystemEasily manage temporary or permanent highlights without triggering full UI rebuilds.// Add a new highlight
 _highlights.value = [
   ..._highlights.value, 
   HighlightVerse(surah: 1, verseNumber: 2, page: 1, color: Colors.blue.withOpacity(0.3))
@@ -170,13 +114,7 @@ _highlights.value = [];
 
 // Remove a specific highlight
 _highlights.value = _highlights.value.where((h) => !(h.surah == 1 && h.verseNumber == 2)).toList();
-
-
-7. Rich Metadata APIs
-
-Access detailed information about the Quran synchronously (no await needed):
-
-// Global Constants
+7. Rich Metadata APIsAccess detailed information about the Quran synchronously (no await needed):// Global Constants
 print(totalSurahCount);    // 114
 print(totalVerseCount);    // 6236
 print(totalMakkiSurahs);   // 86
@@ -201,30 +139,4 @@ String hizbTextEn = getCurrentHizbTextForPage(1, isArabic: false); // "Hizb 1"
 
 // QCF Fonts Support
 String qcfGlyph = getaya_noQCF(1, 1);      // Returns the QCF symbol for Ayah 1
-
-
-📚 Complete Example
-
-Check out the example folder in the repository for a complete, production-ready application showcasing:
-
-Dark/Light mode theme adaptability.
-
-Audio-sync simulation (Auto-Play mocking).
-
-Custom UI builders with image frames.
-
-Built-in search engine UI.
-
-BottomSheets for displaying verse metadata.
-
-🤝 Contributions
-
-Contributions, issues, and feature requests are welcome! Feel free to check the issues page.
-
-❤️ Credits
-
-Special thanks to the King Fahd Complex for the Printing of the Holy Quran for the Othmanic text, fonts, and metadata.
-
-📄 License
-
-This project is licensed under the MIT License.
+📚 Complete ExampleCheck out the example folder in the repository for a complete, production-ready application showcasing:Dark/Light mode theme adaptability.Audio-sync simulation (Auto-Play mocking).Custom UI builders with image frames.Built-in search engine UI.BottomSheets for displaying verse metadata.🤝 ContributionsContributions, issues, and feature requests are welcome! Feel free to check the issues page.❤️ CreditsSpecial thanks to the King Fahd Complex for the Printing of the Holy Quran for the Othmanic text, fonts, and metadata.📄 LicenseThis project is licensed under the MIT License.
