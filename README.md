@@ -1,20 +1,36 @@
-# qcf_quran_lite 📖
+# 🕌 qcf_quran_lite
 
-A lightweight, high-performance, and fully customizable Flutter package for rendering the Holy Quran using the official QCF (Hafs) script.
-
-Built for production Quran apps that need:
-
-• Authentic page-by-page Mushaf rendering  
-• Vertical reading mode  
-• Reactive highlighting  
-• Audio synchronization  
-• Advanced Arabic search  
-• Fully offline data  
+A **lightweight, high-performance Flutter Quran package** using the official **QCF (Hafs) font**.  
+> Full Quran, offline, high-performance, **adds only ~15MB** to your app size.
 
 ---
 
+## 📦 Package Size Impact
+
+- Approx. **15 MB** only for the full 604-page Quran data.  
+- Includes Othmanic glyphs, metadata, Juz/Quarter indexing, and search.
+
+**Why This Matters:**  
+Most Quran packages are heavy or require network downloads. This package is fully offline and optimized for mobile.
+
+---
+
+
 ## ✨ Features
 
+- Full **604-page Quran** with QCF glyphs  
+- **Offline-ready**: no internet required  
+- Surah metadata: Arabic, transliteration, English  
+- **Juz** & **Quarter (Rub al-Hizb)** indexing  
+- Place of revelation (Makkah / Madinah)  
+- **Verse highlighting**  
+- Scrollable **Surah list view**  
+- Customizable **Page view** & **Verse builders**  
+- **Search** Quran text offline (up to 50 results)  
+- Remove diacritics & normalize text helpers  
+- High-performance: smooth scrolling, 60fps  
+- Light & dark mode compatible  
+- Minimal app size (~15MB)  
 ### 📜 1. Authentic Mushaf PageView (604 Pages)
 - Real Madinah Mushaf layout
 - PageController support
