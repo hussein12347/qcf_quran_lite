@@ -1,18 +1,59 @@
+/// Represents a single verse (Ayah) of the Holy Quran.
+/// 
+/// This model holds all the necessary metadata for a verse, including its
+/// location (Surah, page, Juz), structural information (lines, centering),
+/// and the actual text in multiple scripts (Standard, Emlaey, and Othmanic).
 class Ayah {
-  final int id,
-      jozz,
-      surahNumber,
-      page,
-      lineStart,
-      lineEnd,
-      ayahNumber,
-      quarter,
-      hizb;
-  final String surahNameEn, surahNameAr, ayahText;
+  /// Unique identifier for the Ayah across the entire Quran.
+  final int id;
+
+  /// The Juz (part) number (1-30) where this Ayah is located.
+  final int jozz;
+
+  /// The number of the Surah (chapter) containing this Ayah (1-114).
+  final int surahNumber;
+
+  /// The page number in the standard Mushaf where this Ayah appears.
+  final int page;
+
+  /// The line number where this Ayah starts on the page.
+  final int lineStart;
+
+  /// The line number where this Ayah ends on the page.
+  final int lineEnd;
+
+  /// The verse number within its specific Surah.
+  final int ayahNumber;
+
+  /// The Rub el Hizb (quarter) index.
+  final int quarter;
+
+  /// The Hizb index.
+  final int hizb;
+
+  /// The English transliterated or translated name of the Surah.
+  final String surahNameEn;
+
+  /// The Arabic name of the Surah.
+  final String surahNameAr;
+
+  /// The plain/Emlaey text of the Ayah (often used for search without diacritics).
+  final String ayahText;
+
+  /// The standard display text of the Ayah with standard diacritics.
   String ayah;
-  String othmanicAyah; // تم الإضافة
+
+  /// The text of the Ayah written in the beautiful Uthmani (Othmanic) script.
+  String othmanicAyah;
+
+  /// Indicates whether this Ayah requires a prostration (Sajdah).
   final bool sajda;
+
+  /// Indicates if this specific text segment should be centered on the page
+  /// (often true for the end of a Surah or special markers).
   bool centered;
+
+  /// Tracks whether the user has marked this verse as a favorite/bookmark.
   bool isFavorite;
 
   Ayah({
@@ -29,12 +70,13 @@ class Ayah {
     required this.surahNameEn,
     required this.surahNameAr,
     required this.ayah,
-    required this.othmanicAyah, // تم الإضافة
+    required this.othmanicAyah,
     required this.ayahText,
     required this.sajda,
     required this.centered,
   });
 
+  /// Converts the [Ayah] instance into a JSON map.
   Map<String, dynamic> toJson() => {
     'id': id,
     'jozz': jozz,
@@ -46,17 +88,18 @@ class Ayah {
     'sora_name_en': surahNameEn,
     'sora_name_ar': surahNameAr,
     'aya_text': ayah,
-    'aya_text_othmanic': othmanicAyah, // تم التصحيح هنا
+    'aya_text_othmanic': othmanicAyah,
     'aya_text_emlaey': ayahText,
     'centered': centered,
   };
 
   @override
   String toString() =>
-      "\"id\": $id, \"jozz\": $jozz,\"sora\": $surahNumber,\"page\": $page,\"line_start\": $lineStart,\"line_end\": $lineEnd,\"aya_no\": $ayahNumber,\"sora_name_en\": \"$surahNameEn\",\"sora_name_ar\": \"$surahNameAr\",\"aya_text\": \"${ayah.replaceAll("\n", "\\n")}\",\"aya_text_othmanic\": \"${othmanicAyah.replaceAll("\n", "\\n")}\",\"aya_text_emlaey\": \"${ayahText.replaceAll("\n", "\\n")}\",\"centered\": $centered"; // تم إضافة النص العثماني هنا
+      "\"id\": $id, \"jozz\": $jozz,\"sora\": $surahNumber,\"page\": $page,\"line_start\": $lineStart,\"line_end\": $lineEnd,\"aya_no\": $ayahNumber,\"sora_name_en\": \"$surahNameEn\",\"sora_name_ar\": \"$surahNameAr\",\"aya_text\": \"${ayah.replaceAll("\n", "\\n")}\",\"aya_text_othmanic\": \"${othmanicAyah.replaceAll("\n", "\\n")}\",\"aya_text_emlaey\": \"${ayahText.replaceAll("\n", "\\n")}\",\"centered\": $centered";
 
+  /// Factory constructor to create an [Ayah] instance from a JSON map.
   factory Ayah.fromJson(Map<String, dynamic> json) {
-    // معالجة النص العادي (ayah)
+    // Process standard text (ayah) to ensure proper spacing around newlines
     String ayahTextParsed = json['aya_text'] ?? '';
     if (ayahTextParsed.isNotEmpty) {
       if (ayahTextParsed[ayahTextParsed.length - 1] == '\n') {
@@ -66,7 +109,7 @@ class Ayah {
       }
     }
 
-    // معالجة النص العثماني (othmanicAyah) - تم تصحيح المنطق هنا
+    // Process Othmanic text (othmanicAyah) to ensure proper spacing around newlines
     String ayahOthmanicText = json['aya_text_othmanic'] ?? '';
     if (ayahOthmanicText.isNotEmpty) {
       if (ayahOthmanicText[ayahOthmanicText.length - 1] == '\n') {
@@ -96,14 +139,16 @@ class Ayah {
       ayahText: json['aya_text_emlaey'],
       sajda: false,
       centered: json['centered'] ?? false,
-      othmanicAyah: ayahOthmanicText, // تمرير القيمة هنا
+      othmanicAyah: ayahOthmanicText,
     );
   }
 
+  /// Factory constructor used primarily when splitting an existing [Ayah] 
+  /// into multiple line segments during page rendering.
   factory Ayah.fromAya({
     required Ayah ayah,
     required String aya,
-    required String othmanicAyah, // تم الإضافة
+    required String othmanicAyah,
     required String ayaText,
     bool centered = false,
   }) => Ayah(
@@ -119,7 +164,7 @@ class Ayah {
     surahNameEn: ayah.surahNameEn,
     surahNameAr: ayah.surahNameAr,
     isFavorite: ayah.isFavorite,
-    othmanicAyah: othmanicAyah, // تم التمرير بشكل صحيح
+    othmanicAyah: othmanicAyah,
     ayah: aya,
     ayahText: ayaText,
     sajda: false,
@@ -130,10 +175,13 @@ class Ayah {
 const english = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
 const arabic = ['٠', '١', '٢', '٣', '٤', '٥', '٦', '٧', '٨', '٩'];
 
+/// Helpful string extensions for Quranic text manipulation.
 extension StringExtensions on String {
+  /// Inserts a [text] substring into the current string at the specified [index].
   String insert(String text, int index) =>
       substring(0, index) + text + substring(index);
 
+  /// Converts standard Western/English numerals in a string to Eastern Arabic numerals.
   String toArabic() {
     String number = this;
     for (int i = 0; i < english.length; i++) {

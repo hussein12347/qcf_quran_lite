@@ -327,38 +327,71 @@ String getaya_noQCF(int surahNumber, int aya_no, {bool verseEndSymbol = true}) {
 
   return glyph;
 }
-
 /// Searches the Quran text for the specified [words].
 ///
 /// Returns a [Map] containing:
 /// - `occurences`: The total number of matches found.
 /// - `result`: A [List] of [Map]s containing the `sora` and `aya_no` of the matches.
-Map searchWords(String words) {
-  List<Map> result = [];
+String normalizeArabicText(String text) {
+  if (text.isEmpty) return text;
 
-  for (var i in quran) {
-    if (i['aya_text_emlaey'].toString().toLowerCase().contains(
-      words.toLowerCase(),
-    )) {
-      if (result.length < 50) {
-        result.add({"sora": i["sora"], "aya_no": i["aya_no"]});
-      }
+  text = text.replaceAll(RegExp(r'[\u064B-\u065F\u0670]'), '');
+
+  text = text.replaceAll(RegExp(r'[إأآا]'), 'ا');
+
+  text = text.replaceAll(RegExp(r'[يى]'), 'ي');
+
+  text = text.replaceAll(RegExp(r'ة'), 'ه');
+
+  return text;
+}
+
+// 2. دالة البحث الرئيسية
+Map<String, dynamic> searchWords(String query, {int limit = 50}) {
+  if (query.trim().isEmpty) {
+    return {"occurences": 0, "result": []};
+  }
+
+  List<Map<String, dynamic>> result = [];
+
+  String normalizedQuery = normalizeArabicText(query.toLowerCase());
+
+  for (var aya in quran) {
+    String emlaeyText = aya['aya_text_emlaey']?.toString() ?? "";
+    String normalizedEmlaey = normalizeArabicText(emlaeyText.toLowerCase());
+
+    if (normalizedEmlaey.contains(normalizedQuery)) {
+      result.add({
+        "sora": aya["sora"],
+        "aya_no": aya["aya_no"],
+        "text": emlaeyText.replaceAll('\n', '').trim(),
+      });
+
+      if (result.length >= limit) break;
     }
   }
 
   if (result.isEmpty) {
-    for (var i in quran) {
-      if (i['aya_text'].toString().toLowerCase().contains(
-        words.toLowerCase(),
-      )) {
-        if (result.length < 50) {
-          result.add({"sora": i["sora"], "aya_no": i["aya_no"]});
-        }
+    for (var aya in quran) {
+      String othmanicText = aya['aya_text']?.toString() ?? "";
+      String normalizedOthmanic = normalizeArabicText(othmanicText.toLowerCase());
+
+      if (normalizedOthmanic.contains(normalizedQuery)) {
+        result.add({
+          "sora": aya["sora"],
+          "aya_no": aya["aya_no"],
+          "text": othmanicText.replaceAll('\n', '').trim(),
+        });
+
+        if (result.length >= limit) break;
       }
     }
   }
 
-  return {"occurences": result.length, "result": result};
+  return {
+    "occurences": result.length,
+    "result": result
+  };
 }
 
 /// Converts Quran text to a normalized form suitable for search or comparison.

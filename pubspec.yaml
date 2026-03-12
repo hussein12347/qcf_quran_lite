@@ -1,8 +1,7 @@
 name: qcf_quran_lite
 description: Lightweight offline Quran package with Hafs font.
 homepage: https://github.com/hussein12347/qcf_quran_lite/?tab=readme-ov-file
-publish_to: "https://pub.dev"
-version: 0.0.1
+version: 0.0.2
 
 environment:
   sdk: ">=3.0.0 <4.0.0"
@@ -28,6 +27,8 @@ flutter:
   # To add assets to your package, add an assets section, like this:
   assets:
      - assets/surah_banner.png
+     - assets/fonts/QCF4_BSML/QCF4_BSML.ttf
+     - assets/fonts/
   #   - images/a_dot_ham.jpeg
   #
   # For details regarding assets in packages, see
@@ -46,6 +47,9 @@ flutter:
   - family: "arsura"
     fonts:
       - asset: assets/fonts/arsura.ttf
+  - family: "QCF4_BSML"
+    fonts:
+      - asset: assets/fonts/QCF4_BSML/QCF4_BSML.ttf
   - family: "hafs"
     fonts:
       - asset: assets/fonts/HafsSmart_08.ttf

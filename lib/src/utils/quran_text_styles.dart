@@ -27,4 +27,13 @@ class QuranTextStyles {
       fontSize: fontSize,
     );
   }
+  /// Specialized font style for the Basmallah (Bismillah) calligraphic text.
+  static TextStyle basmallahStyle({Color? color, double fontSize = 30.0}) {
+    return TextStyle(
+      fontFamily: 'QCF4_BSML',
+      package: 'qcf_quran_lite',
+      color: color,
+      fontSize: fontSize,
+    );
+  }
 }
