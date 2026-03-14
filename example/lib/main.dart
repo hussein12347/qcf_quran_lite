@@ -312,9 +312,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   IconButton(
                                     icon: Icon(
                                       Icons.menu_book,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.primary,
+                                      color: Theme.of(context).colorScheme.primary,
                                       size: 20,
                                     ),
                                     tooltip: 'افتح في المصحف',
@@ -334,9 +332,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                                   IconButton(
                                     icon: Icon(
                                       Icons.format_list_numbered_rtl,
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.secondary,
+                                      color: Theme.of(context).colorScheme.secondary,
                                       size: 20,
                                     ),
                                     tooltip: 'افتح في القائمة',
@@ -389,12 +385,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildNavButton(
-    BuildContext context, {
-    required String title,
-    required IconData icon,
-    required Color color,
-    required VoidCallback onTap,
-  }) {
+      BuildContext context, {
+        required String title,
+        required IconData icon,
+        required Color color,
+        required VoidCallback onTap,
+      }) {
     return InkWell(
       onTap: onTap,
       borderRadius: BorderRadius.circular(15),
@@ -449,7 +445,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     items: List.generate(
                       114,
-                      (i) => DropdownMenuItem(
+                          (i) => DropdownMenuItem(
                         value: i + 1,
                         child: Text(getSurahNameArabic(i + 1)),
                       ),
@@ -478,7 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     items: List.generate(
                       maxAyahs,
-                      (i) => DropdownMenuItem(
+                          (i) => DropdownMenuItem(
                         value: i + 1,
                         child: Text('${i + 1}'),
                       ),
@@ -612,7 +608,8 @@ class MushafScreen extends StatefulWidget {
 
 class _MushafScreenState extends State<MushafScreen> {
   late PageController _pageController;
-  late ValueNotifier<List<HighlightVerse>> _activeHighlightsNotifier;
+  // استبدال ValueNotifier بمتغير عادي
+  List<HighlightVerse> _activeHighlights = [];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   late ValueNotifier<String> _hizbTextNotifier;
 
@@ -622,7 +619,6 @@ class _MushafScreenState extends State<MushafScreen> {
   void initState() {
     super.initState();
     _pageController = PageController(initialPage: widget.initialPage - 1);
-    _activeHighlightsNotifier = ValueNotifier([]);
     _hizbTextNotifier = ValueNotifier(
       getCurrentHizbTextForPage(widget.initialPage, isArabic: true),
     );
@@ -649,16 +645,18 @@ class _MushafScreenState extends State<MushafScreen> {
       page: page,
       color: highlightColor,
     );
-    _activeHighlightsNotifier.value = [
-      ..._activeHighlightsNotifier.value,
-      newHighlight,
-    ];
+
+    setState(() {
+      _activeHighlights = [..._activeHighlights, newHighlight];
+    });
 
     _highlightTimer = Timer(const Duration(seconds: 3), () {
       if (mounted) {
-        _activeHighlightsNotifier.value = _activeHighlightsNotifier.value
-            .where((h) => !(h.surah == surah && h.verseNumber == ayah))
-            .toList();
+        setState(() {
+          _activeHighlights = _activeHighlights
+              .where((h) => !(h.surah == surah && h.verseNumber == ayah))
+              .toList();
+        });
       }
     });
   }
@@ -666,18 +664,17 @@ class _MushafScreenState extends State<MushafScreen> {
   @override
   void dispose() {
     _pageController.dispose();
-    _activeHighlightsNotifier.dispose();
     _hizbTextNotifier.dispose();
     _highlightTimer?.cancel();
     super.dispose();
   }
 
   void _showAyahDetails(
-    BuildContext context,
-    int surahNumber,
-    int verseNumber,
-    int pageNumber,
-  ) {
+      BuildContext context,
+      int surahNumber,
+      int verseNumber,
+      int pageNumber,
+      ) {
     final String surahAr = getSurahNameArabic(surahNumber);
     final int juz = getJuzNumber(surahNumber, verseNumber);
     final String revelation = getPlaceOfRevelation(surahNumber);
@@ -760,11 +757,11 @@ class _MushafScreenState extends State<MushafScreen> {
   }
 
   Widget _buildBottomSheetCard(
-    BuildContext context,
-    String title,
-    String value,
-    IconData icon,
-  ) {
+      BuildContext context,
+      String title,
+      String value,
+      IconData icon,
+      ) {
     return Container(
       width: 65,
       padding: const EdgeInsets.symmetric(vertical: 12),
@@ -821,15 +818,18 @@ class _MushafScreenState extends State<MushafScreen> {
         actions: [
           IconButton(
             icon: const Icon(Icons.format_color_reset),
-            onPressed: () => _activeHighlightsNotifier.value = [],
+            onPressed: () {
+              setState(() {
+                _activeHighlights = [];
+              });
+            },
           ),
         ],
       ),
       body: SafeArea(
         child: QuranPageView(
           pageController: _pageController,
-          highlightsNotifier: _activeHighlightsNotifier,
-          scaffoldKey: _scaffoldKey,
+          highlights: _activeHighlights, // تمرير الليست العادية
           ayahStyle: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
@@ -843,30 +843,32 @@ class _MushafScreenState extends State<MushafScreen> {
             final currentPage = _pageController.hasClients
                 ? _pageController.page!.toInt() + 1
                 : widget.initialPage;
-            final isHighlighted = _activeHighlightsNotifier.value.any(
-              (e) => e.surah == surahNumber && e.verseNumber == verseNumber,
+
+            final isHighlighted = _activeHighlights.any(
+                  (e) => e.surah == surahNumber && e.verseNumber == verseNumber,
             );
 
-            if (!isHighlighted) {
-              _activeHighlightsNotifier.value = [
-                ..._activeHighlightsNotifier.value,
-                HighlightVerse(
-                  surah: surahNumber,
-                  verseNumber: verseNumber,
-                  page: currentPage,
-                  color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFFD4AF37).withValues(alpha: 0.3)
-                      : const Color(0xFF8D6E63).withValues(alpha: 0.2),
-                ),
-              ];
-            } else {
-              _activeHighlightsNotifier.value = _activeHighlightsNotifier.value
-                  .where(
-                    (e) =>
-                        e.surah != surahNumber || e.verseNumber != verseNumber,
-                  )
-                  .toList();
-            }
+            setState(() {
+              if (!isHighlighted) {
+                _activeHighlights = [
+                  ..._activeHighlights,
+                  HighlightVerse(
+                    surah: surahNumber,
+                    verseNumber: verseNumber,
+                    page: currentPage,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? const Color(0xFFD4AF37).withValues(alpha: 0.3)
+                        : const Color(0xFF8D6E63).withValues(alpha: 0.2),
+                  ),
+                ];
+              } else {
+                _activeHighlights = _activeHighlights
+                    .where(
+                      (e) => e.surah != surahNumber || e.verseNumber != verseNumber,
+                )
+                    .toList();
+              }
+            });
             _showAyahDetails(context, surahNumber, verseNumber, currentPage);
           },
         ),
@@ -894,9 +896,8 @@ class SurahListReaderScreen extends StatefulWidget {
 
 class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
   late int _selectedSurah;
-  final ValueNotifier<List<HighlightVerse>> _highlightsNotifier = ValueNotifier(
-    [],
-  );
+  // استبدال ValueNotifier بمتغير عادي
+  List<HighlightVerse> _highlights = [];
   final ItemScrollController _itemScrollController = ItemScrollController();
 
   // --- Auto-Play State ---
@@ -931,14 +932,16 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
         ? Colors.amber.withOpacity(0.5)
         : const Color(0xFF8D6E63).withValues(alpha: 0.3);
 
-    _highlightsNotifier.value = [
-      HighlightVerse(
-        surah: _selectedSurah,
-        verseNumber: ayahNumber,
-        page: 0,
-        color: highlightColor,
-      ),
-    ];
+    setState(() {
+      _highlights = [
+        HighlightVerse(
+          surah: _selectedSurah,
+          verseNumber: ayahNumber,
+          page: 0,
+          color: highlightColor,
+        ),
+      ];
+    });
   }
 
   // Toggles the mock audio playback
@@ -946,26 +949,26 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
     if (_isPlaying) {
       _stopPlay();
     } else {
-      _currentPlayingAyah = startAyah;
-      _isPlaying = true;
-      setState(() {});
+      setState(() {
+        _currentPlayingAyah = startAyah;
+        _isPlaying = true;
+      });
 
       // Highlight the first Ayah immediately
       _highlightAndScrollToAyah(_currentPlayingAyah);
 
       // Start the mock playback timer (moves to the next Ayah every 4 seconds)
       _playbackTimer = Timer.periodic(const Duration(seconds: 4), (timer) {
-        _currentPlayingAyah++;
         int maxAyahs = getVerseCount(_selectedSurah);
 
-        if (_currentPlayingAyah > maxAyahs) {
+        if (_currentPlayingAyah >= maxAyahs) {
           // Reached the end of the Surah
           _stopPlay();
         } else {
+          setState(() {
+            _currentPlayingAyah++;
+          });
           _highlightAndScrollToAyah(_currentPlayingAyah);
-          setState(
-            () {},
-          ); // Update the UI to show the 'pause' button on the new Ayah
         }
       });
     }
@@ -976,13 +979,12 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
     setState(() {
       _isPlaying = false;
       _currentPlayingAyah = 0;
+      _highlights = [];
     });
-    _highlightsNotifier.value = [];
   }
 
   @override
   void dispose() {
-    _highlightsNotifier.dispose();
     _playbackTimer?.cancel();
     super.dispose();
   }
@@ -1018,7 +1020,7 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
 
                 setState(() {
                   _selectedSurah = value;
-                  _highlightsNotifier.value = [];
+                  _highlights = [];
                 });
 
                 if (_itemScrollController.isAttached) {
@@ -1033,128 +1035,126 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
       body: SafeArea(
         child: QuranSurahListView(
           surahNumber: _selectedSurah,
-          highlightsNotifier: _highlightsNotifier,
+          highlights: _highlights, // تمرير الليست العادية هنا
           itemScrollController: _itemScrollController,
           initialScrollIndex: widget.highlightAyah ?? 0,
-
-          ayahBuilder:
-              (
-                context,
-                surahNumber,
-                verseNumber,
-                othmanicText,
-                isHighlighted,
-                highlightColor,
+          ayahBuilder: (
+              context,
+              surahNumber,
+              verseNumber,
+              othmanicText,
+              isHighlighted,
+              highlightColor,
               ) {
-                // Check if this specific Ayah is currently "playing"
-                final bool isCurrentlyPlaying =
-                    _isPlaying && _currentPlayingAyah == verseNumber;
+            // Check if this specific Ayah is currently "playing"
+            final bool isCurrentlyPlaying =
+                _isPlaying && _currentPlayingAyah == verseNumber;
 
-                return AnimatedContainer(
-                  duration: const Duration(milliseconds: 300),
-                  margin: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isHighlighted
-                        ? highlightColor.withOpacity(0.15)
-                        : Theme.of(context).cardColor,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(
-                      color: isHighlighted
-                          ? highlightColor
-                          : primaryColor.withOpacity(0.1),
-                      width: isHighlighted ? 1.5 : 1,
+            return AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 8,
+              ),
+              decoration: BoxDecoration(
+                color: isHighlighted
+                    ? highlightColor.withOpacity(0.15)
+                    : Theme.of(context).cardColor,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: isHighlighted
+                      ? highlightColor
+                      : primaryColor.withOpacity(0.1),
+                  width: isHighlighted ? 1.5 : 1,
+                ),
+                boxShadow: [
+                  if (!isDark && !isHighlighted)
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.03),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4),
                     ),
-                    boxShadow: [
-                      if (!isDark && !isHighlighted)
-                        BoxShadow(
-                          color: Colors.black.withOpacity(0.03),
-                          blurRadius: 8,
-                          offset: const Offset(0, 4),
-                        ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 12,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: primaryColor.withOpacity(0.05),
-                          borderRadius: const BorderRadius.vertical(
-                            top: Radius.circular(15),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 8,
+                    ),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.05),
+                      borderRadius: const BorderRadius.vertical(
+                        top: Radius.circular(15),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: primaryColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            'آية $verseNumber',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              color: primaryColor,
+                              fontSize: 12,
+                            ),
                           ),
                         ),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 4,
-                              ),
-                              decoration: BoxDecoration(
-                                color: primaryColor.withOpacity(0.1),
-                                borderRadius: BorderRadius.circular(12),
-                              ),
-                              child: Text(
-                                'آية $verseNumber',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: primaryColor,
-                                  fontSize: 12,
-                                ),
+                            // Dynamic Play/Pause Button
+                            InkWell(
+                              onTap: () => _togglePlay(verseNumber),
+                              child: Icon(
+                                isCurrentlyPlaying
+                                    ? Icons.pause_circle_filled
+                                    : Icons.play_circle_outline,
+                                size: 26,
+                                color: isCurrentlyPlaying
+                                    ? const Color(0xFFD4AF37)
+                                    : primaryColor,
                               ),
                             ),
-                            Row(
-                              children: [
-                                // Dynamic Play/Pause Button
-                                InkWell(
-                                  onTap: () => _togglePlay(verseNumber),
-                                  child: Icon(
-                                    isCurrentlyPlaying
-                                        ? Icons.pause_circle_filled
-                                        : Icons.play_circle_outline,
-                                    size: 26,
-                                    color: isCurrentlyPlaying
-                                        ? const Color(0xFFD4AF37)
-                                        : primaryColor,
-                                  ),
-                                ),
-                                const SizedBox(width: 16),
-                                Icon(Icons.copy, size: 18, color: primaryColor),
-                                const SizedBox(width: 16),
-                                Icon(
-                                  Icons.share_outlined,
-                                  size: 18,
-                                  color: primaryColor,
-                                ),
-                              ],
+                            const SizedBox(width: 16),
+                            Icon(Icons.copy, size: 18, color: primaryColor),
+                            const SizedBox(width: 16),
+                            Icon(
+                              Icons.share_outlined,
+                              size: 18,
+                              color: primaryColor,
                             ),
                           ],
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Text(
-                          othmanicText,
-                          textAlign: TextAlign.right,
-                          style: QuranTextStyles.hafsStyle(
-                            fontSize: 26,
-                            color: Theme.of(context).textTheme.bodyLarge!.color,
-                            height: 1.8,
-                          ),
-                        ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
-                );
-              },
+                  Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Text(
+                      othmanicText,
+                      textAlign: TextAlign.right,
+                      style: QuranTextStyles.hafsStyle(
+                        fontSize: 26,
+                        color: Theme.of(context).textTheme.bodyLarge!.color,
+                        height: 1.8,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
         ),
       ),
     );

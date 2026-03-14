@@ -829,7 +829,6 @@ class _MushafScreenState extends State<MushafScreen> {
         child: QuranPageView(
           pageController: _pageController,
           highlightsNotifier: _activeHighlightsNotifier,
-          scaffoldKey: _scaffoldKey,
           ayahStyle: TextStyle(
             color: Theme.of(context).textTheme.bodyLarge!.color,
           ),
@@ -855,8 +854,8 @@ class _MushafScreenState extends State<MushafScreen> {
                   verseNumber: verseNumber,
                   page: currentPage,
                   color: Theme.of(context).brightness == Brightness.dark
-                      ? const Color(0xFFD4AF37).withOpacity(0.3)
-                      : const Color(0xFF8D6E63).withOpacity(0.2),
+                      ? const Color(0xFFD4AF37).withValues(alpha: 0.3)
+                      : const Color(0xFF8D6E63).withValues(alpha: 0.2),
                 ),
               ];
             } else {
@@ -929,7 +928,7 @@ class _SurahListReaderScreenState extends State<SurahListReaderScreen> {
 
     final highlightColor = Theme.of(context).brightness == Brightness.dark
         ? Colors.amber.withOpacity(0.5)
-        : const Color(0xFF8D6E63).withOpacity(0.3);
+        : const Color(0xFF8D6E63).withValues(alpha: 0.3);
 
     _highlightsNotifier.value = [
       HighlightVerse(

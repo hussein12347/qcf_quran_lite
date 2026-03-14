@@ -8,59 +8,42 @@ import 'bsmallah_widget.dart';
 import 'surah_header_widget.dart';
 
 /// A highly customizable widget that displays a specific Surah as a vertically scrollable list.
-///
-/// [QuranSurahListView] is perfect for building "Reading Modes", Tafseer apps,
-/// or translation views. It natively supports Audio Syncing capabilities by
-/// exposing [itemScrollController] and [itemPositionsListener] from the
-/// `scrollable_positioned_list` package.
 class QuranSurahListView extends StatelessWidget {
   /// The Surah number (1-114) to be displayed.
   final int surahNumber;
 
-  /// A reactive notifier containing a list of [HighlightVerse] for dynamically
-  /// highlighting specific Ayahs without rebuilding the entire list.
-  final ValueNotifier<List<HighlightVerse>> highlightsNotifier;
+  /// A normal list of [HighlightVerse] for dynamically highlighting specific Ayahs.
+  final List<HighlightVerse> highlights;
 
   /// Callback fired when a specific verse is long-pressed.
   /// Provides the [surahNumber], [verseNumber], and touch [details].
   final void Function(
-    int surahNumber,
-    int verseNumber,
-    LongPressStartDetails details,
-  )?
-  onLongPress;
+      int surahNumber,
+      int verseNumber,
+      LongPressStartDetails details,
+      )? onLongPress;
 
   /// Custom text styling for the default Quranic text rendering.
   /// Use this to adjust font size, color, or height.
   final TextStyle? ayahStyle;
 
   /// A custom builder to completely override the default Surah Header widget.
-  final Widget Function(BuildContext context, int surahNumber)?
-  surahHeaderBuilder;
+  final Widget Function(BuildContext context, int surahNumber)? surahHeaderBuilder;
 
   /// A custom builder to completely override the default Basmallah widget.
-  final Widget Function(BuildContext context, int surahNumber)?
-  basmallahBuilder;
+  final Widget Function(BuildContext context, int surahNumber)? basmallahBuilder;
 
   /// A powerful builder that grants FULL CONTROL over how each Ayah is rendered.
-  ///
-  /// If provided, the default text rendering is bypassed. You receive the
-  /// [surahNumber], [verseNumber], cleaned [othmanicText], and the current
-  /// highlight state to build your own custom UI (e.g., Cards with translations).
   final Widget Function(
-    BuildContext context,
-    int surahNumber,
-    int verseNumber,
-    String othmanicText,
-    bool isHighlighted,
-    Color highlightColor,
-  )?
-  ayahBuilder;
+      BuildContext context,
+      int surahNumber,
+      int verseNumber,
+      String othmanicText,
+      bool isHighlighted,
+      Color highlightColor,
+      )? ayahBuilder;
 
   /// Controller to programmatically jump or scroll to a specific Ayah.
-  ///
-  /// **NOTE:** Index 0 is reserved for the Surah Header/Basmallah.
-  /// Ayah 1 is at index 1, Ayah 2 at index 2, and so on.
   final ItemScrollController? itemScrollController;
 
   /// Listener to track which Ayahs are currently visible on the screen.
@@ -74,7 +57,7 @@ class QuranSurahListView extends StatelessWidget {
   const QuranSurahListView({
     super.key,
     required this.surahNumber,
-    required this.highlightsNotifier,
+    this.highlights = const [],
     this.onLongPress,
     this.ayahStyle,
     this.surahHeaderBuilder,
@@ -111,8 +94,7 @@ class QuranSurahListView extends StatelessWidget {
         itemPositionsListener: itemPositionsListener,
         initialScrollIndex: initialScrollIndex,
         physics: const BouncingScrollPhysics(),
-        itemCount:
-            surahAyahs.length + 1, // +1 to accommodate the Header/Basmallah
+        itemCount: surahAyahs.length + 1, // +1 to accommodate the Header/Basmallah
         itemBuilder: (context, index) {
           // Render Header and Basmallah at index 0
           if (index == 0) {
@@ -133,70 +115,61 @@ class QuranSurahListView extends StatelessWidget {
           final ayahData = surahAyahs[index - 1];
           final int verseNumber = ayahData['aya_no'];
 
-          // Clean the Othmanic text: remove newlines and replace multiple spaces with a single space
+          // Clean the Othmanic text
           final String othmanicText = ayahData['aya_text_othmanic']
               .toString()
               .replaceAll('\n', '')
               .replaceAll(RegExp(r'\s+'), ' ')
               .trim();
 
-          // Reactive builder for performant verse highlighting
-          return ValueListenableBuilder<List<HighlightVerse>>(
-            valueListenable: highlightsNotifier,
-            builder: (context, highlights, _) {
-              final isHighlighted = highlights.any(
+          // التحقق من الـ Highlights باستخدام الليست العادية
+          final isHighlighted = highlights.any(
                 (h) => h.surah == surahNumber && h.verseNumber == verseNumber,
-              );
-              final highlightColor = isHighlighted
-                  ? highlights
-                        .firstWhere(
-                          (h) =>
-                              h.surah == surahNumber &&
-                              h.verseNumber == verseNumber,
-                        )
-                        .color
-                  : Colors.transparent;
+          );
 
-              return GestureDetector(
-                onLongPressStart: (details) {
-                  if (onLongPress != null) {
-                    onLongPress!(surahNumber, verseNumber, details);
-                  }
-                },
-                // Use custom builder if provided, otherwise use the default UI
-                child: ayahBuilder != null
-                    ? ayahBuilder!(
-                        context,
-                        surahNumber,
-                        verseNumber,
-                        othmanicText,
-                        isHighlighted,
-                        highlightColor,
-                      )
-                    : Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
-                        margin: const EdgeInsets.symmetric(
-                          horizontal: 8,
-                          vertical: 4,
-                        ),
-                        decoration: BoxDecoration(
-                          color: isHighlighted
-                              ? highlightColor.withValues(alpha: 0.3)
-                              : Colors.transparent,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text(
-                          othmanicText,
-                          textAlign: TextAlign.right,
-                          style: finalStyle,
-                        ),
-                      ),
-              );
+          final highlightColor = isHighlighted
+              ? highlights.firstWhere(
+                (h) => h.surah == surahNumber && h.verseNumber == verseNumber,
+          ).color
+              : Colors.transparent;
+
+          return GestureDetector(
+            onLongPressStart: (details) {
+              if (onLongPress != null) {
+                onLongPress!(surahNumber, verseNumber, details);
+              }
             },
+            child: ayahBuilder != null
+                ? ayahBuilder!(
+              context,
+              surahNumber,
+              verseNumber,
+              othmanicText,
+              isHighlighted,
+              highlightColor,
+            )
+                : Container(
+              width: double.infinity,
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16,
+                vertical: 12,
+              ),
+              margin: const EdgeInsets.symmetric(
+                horizontal: 8,
+                vertical: 4,
+              ),
+              decoration: BoxDecoration(
+                color: isHighlighted
+                    ? highlightColor.withValues(alpha: 0.3)
+                    : Colors.transparent,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                othmanicText,
+                textAlign: TextAlign.right,
+                style: finalStyle,
+              ),
+            ),
           );
         },
       ),

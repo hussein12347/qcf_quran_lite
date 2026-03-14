@@ -12,14 +12,14 @@ Designed for professional Islamic applications, this package provides a fully of
 
 ## 📸 Screenshots
 
-  <p align="center">
-  <img width="250" alt="Screenshot_20260304_165118" src="https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f" />
-  <img width="250" alt="Screenshot_20260304_165147" src="https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08" />
-  </p>
-  <p align="center">
-  <img width="250"  alt="Screenshot_20260304_165210" src="https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b" />
-  <img width="250" alt="Screenshot_20260304_165812" src="https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd" />
-  </p>
+<p align="center">
+  <img width="250" alt="Screenshot_20260304_165118" src="[https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f](https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f)" />
+  <img width="250" alt="Screenshot_20260304_165147" src="[https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08](https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08)" />
+</p>
+<p align="center">
+  <img width="250"  alt="Screenshot_20260304_165210" src="[https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b](https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b)" />
+  <img width="250" alt="Screenshot_20260304_165812" src="[https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd](https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd)" />
+</p>
 
 ---
 
@@ -60,20 +60,20 @@ Displays the Quran in the real Madinah Mushaf layout (Page by Page). Fully custo
 **Example:**
 ```dart
 final PageController _controller = PageController(initialPage: 0); // Page 1
-final ValueNotifier<List<HighlightVerse>> _highlights = ValueNotifier([]);
+List<HighlightVerse> _activeHighlights = [];
 
 QuranPageView(
-pageController: _controller,
-scaffoldKey: GlobalKey<ScaffoldState>(),
-highlightsNotifier: _highlights,
-onPageChanged: (pageNumber) {
-print("User navigated to page: $pageNumber");
-print(getCurrentHizbTextForPage(pageNumber)); // e.g., "نصف الحزب ١"
-},
-onLongPress: (surahNumber, verseNumber, details) {
-// Perfect for showing a bottom sheet with Tafsir or copying options
-print("Tapped Surah: $surahNumber, Verse: $verseNumber");
-},
+  pageController: _controller,
+  scaffoldKey: GlobalKey<ScaffoldState>(),
+  highlights: _activeHighlights,
+  onPageChanged: (pageNumber) {
+    print("User navigated to page: $pageNumber");
+    print(getCurrentHizbTextForPage(pageNumber)); // e.g., "نصف الحزب ١"
+  },
+  onLongPress: (surahNumber, verseNumber, details) {
+    // Perfect for showing a bottom sheet with Tafsir or copying options
+    print("Tapped Surah: $surahNumber, Verse: $verseNumber");
+  },
 );
 ```
 
@@ -85,49 +85,52 @@ A scrollable list view for a specific Surah. Ideal for Tafsir apps, translation 
 **Example:**
 ```dart
 final ItemScrollController _itemScrollController = ItemScrollController();
+List<HighlightVerse> _activeHighlights = [];
 
 QuranSurahListView(
-surahNumber: 1, // Al-Fatihah
-itemScrollController: _itemScrollController,
-highlightsNotifier: _highlights,
-// Fully customizable Ayah Builder!
-ayahBuilder: (context, surahNumber, verseNumber, pageNumber, othmanicText, isHighlighted, highlightColor) {
-return Container(
-color: isHighlighted ? highlightColor.withOpacity(0.2) : Colors.transparent,
-padding: const EdgeInsets.all(16.0),
-child: Column(
-crossAxisAlignment: CrossAxisAlignment.stretch,
-children: [
-Text('Ayah $verseNumber', style: TextStyle(color: Colors.grey)),
-othmanicText, // The natively rendered QCF text widget
-],
-),
-);
-},
+  surahNumber: 1, // Al-Fatihah
+  itemScrollController: _itemScrollController,
+  highlights: _activeHighlights,
+  // Fully customizable Ayah Builder!
+  ayahBuilder: (context, surahNumber, verseNumber, othmanicText, isHighlighted, highlightColor) {
+    return Container(
+      color: isHighlighted ? highlightColor.withOpacity(0.2) : Colors.transparent,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text('Ayah $verseNumber', style: const TextStyle(color: Colors.grey)),
+          othmanicText, // The natively rendered QCF text widget
+        ],
+      ),
+    );
+  },
 );
 ```
 
 ---
 
-### 🎯 3. High-Performance Highlighting
-Highlight verses instantly without calling `setState` and rebuilding the entire UI. Powered by `ValueNotifier`, making it perfect for audio tracking and bookmarks.
+### 🎯 3. Dynamic Ayah Highlighting
+Easily highlight specific verses for audio tracking, bookmarks, or reading progress by passing a list of `HighlightVerse`.
 
 **Example:**
 ```dart
-final highlights = ValueNotifier<List<HighlightVerse>>([]);
+List<HighlightVerse> _activeHighlights = [];
 
-// Add a highlight (e.g., Ayatul Kursi)
-highlights.value = [
-HighlightVerse(
-surah: 2,
-verseNumber: 255,
-page: 42,
-color: Colors.amber.withOpacity(0.4),
-),
-];
+// Add a highlight (e.g., Ayatul Kursi) and update the UI
+setState(() {
+  _activeHighlights = [
+    HighlightVerse(
+      surah: 2,
+      verseNumber: 255,
+      page: 42,
+      color: Colors.amber.withOpacity(0.4),
+    ),
+  ];
+});
 
 // Clear all highlights
-// highlights.value = [];
+// setState(() => _activeHighlights = []);
 ```
 
 ---

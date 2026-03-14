@@ -15,11 +15,8 @@ class QuranPageView extends StatefulWidget {
   /// Callback triggered when the page changes. Returns the current page number.
   final Function(int)? onPageChanged;
 
-  /// Notifies the widget of verses that should be highlighted.
-  final ValueNotifier<List<HighlightVerse>> highlightsNotifier;
-
-  /// The global key for the Scaffold, useful for showing SnackBars or Drawers.
-  final GlobalKey<ScaffoldState> scaffoldKey;
+  /// A normal list of verses that should be highlighted.
+  final List<HighlightVerse> highlights;
 
   /// An optional widget to be displayed at the top of the Quran pages.
   final Widget? topBar;
@@ -54,8 +51,7 @@ class QuranPageView extends StatefulWidget {
     super.key,
     required this.pageController,
     this.onPageChanged,
-    required this.highlightsNotifier,
-    required this.scaffoldKey,
+    this.highlights = const [], // تحولت لليست عادية بقيمة افتراضية
     this.onLongPress,
     this.quranPagesCount = 604,
     this.topBar,
@@ -72,7 +68,6 @@ class QuranPageView extends StatefulWidget {
 
 class _QuranPageViewState extends State<QuranPageView> {
   List<QuranPage> pages = [];
-  bool isLoading = true;
 
   @override
   void initState() {
@@ -87,16 +82,11 @@ class _QuranPageViewState extends State<QuranPageView> {
 
     setState(() {
       pages = quranDataProcessor.staticPages;
-      isLoading = false;
     });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
     return Directionality(
       textDirection: TextDirection.rtl,
       child: Container(
@@ -109,47 +99,24 @@ class _QuranPageViewState extends State<QuranPageView> {
                 physics: const BouncingScrollPhysics(),
                 itemCount: pages.length,
                 controller: widget.pageController,
-                allowImplicitScrolling: true,
                 onPageChanged: (pageIndex) {
                   if (widget.onPageChanged != null) {
-                    // Pass the actual page number (index + 1)
                     widget.onPageChanged!(pageIndex + 1);
                   }
                 },
                 itemBuilder: (ctx, index) {
                   final int pageNum = index + 1;
 
-                  // Add a short delay followed by an entrance animation
-                  return FutureBuilder<void>(
-                    future: Future.delayed(const Duration(milliseconds: 300)),
-                    builder: (context, snapshot) {
-                      final bool isReady = snapshot.connectionState == ConnectionState.done;
-
-                      return AnimatedSwitcher(
-                        duration: const Duration(milliseconds: 300), // Duration of the animation
-                        switchInCurve: Curves.easeIn,
-                        switchOutCurve: Curves.easeOut,
-                        child: isReady
-                            ? QuranSinglePageWidget(
-                          // PageStorageKey is crucial for maintaining state during animation
-                          key: PageStorageKey('page_$pageNum'),
-                          page: pages[index],
-                          pageIndex: pageNum,
-                          highlightsNotifier: widget.highlightsNotifier,
-                          scaffoldKey: widget.scaffoldKey,
-                          onLongPress: widget.onLongPress,
-                          pageController: widget.pageController,
-                          surahHeaderBuilder: widget.surahHeaderBuilder,
-                          basmallahBuilder: widget.basmallahBuilder,
-                          ayahStyle: widget.ayahStyle,
-                        )
-                            : Container(
-                          // ValueKey is required for AnimatedSwitcher to identify the widget change
-                          key: const ValueKey('empty_state'),
-                          color: widget.pageBackgroundColor ?? Colors.transparent,
-                        ),
-                      );
-                    },
+                  return QuranSinglePageWidget(
+                    key: PageStorageKey('page_$pageNum'),
+                    page: pages[index],
+                    pageIndex: pageNum,
+                    highlights: widget.highlights, // تمرير الليست العادية
+                    onLongPress: widget.onLongPress,
+                    pageController: widget.pageController,
+                    surahHeaderBuilder: widget.surahHeaderBuilder,
+                    basmallahBuilder: widget.basmallahBuilder,
+                    ayahStyle: widget.ayahStyle,
                   );
                 },
               ),
@@ -166,8 +133,7 @@ class _QuranPageViewState extends State<QuranPageView> {
 class QuranSinglePageWidget extends StatelessWidget {
   final QuranPage page;
   final int pageIndex;
-  final ValueNotifier<List<HighlightVerse>> highlightsNotifier;
-  final GlobalKey<ScaffoldState> scaffoldKey;
+  final List<HighlightVerse> highlights; // تحولت لليست عادية
   final void Function(int, int, LongPressStartDetails)? onLongPress;
   final PageController pageController;
   final Widget Function(BuildContext context, int surahNumber)? surahHeaderBuilder;
@@ -178,8 +144,7 @@ class QuranSinglePageWidget extends StatelessWidget {
     super.key,
     required this.page,
     required this.pageIndex,
-    required this.highlightsNotifier,
-    required this.scaffoldKey,
+    this.highlights = const [], // قيمة افتراضية
     this.onLongPress,
     required this.pageController,
     this.surahHeaderBuilder,
@@ -200,8 +165,6 @@ class QuranSinglePageWidget extends StatelessWidget {
     );
   }
 
-  /// Builds the layout for the first two pages (Al-Fatihah and the beginning of Al-Baqarah)
-  /// which often require special centering and padding in standard Mushafs.
   Widget _buildFirstTwoPages(BuildContext context, Size deviceSize) {
     return Center(
       child: SingleChildScrollView(
@@ -228,7 +191,6 @@ class QuranSinglePageWidget extends StatelessWidget {
     );
   }
 
-  /// Builds the layout for standard Quran pages (from page 3 onwards).
   Widget _buildStandardPage(
       BuildContext context,
       Size deviceSize,
@@ -246,7 +208,6 @@ class QuranSinglePageWidget extends StatelessWidget {
             final line = page.lines[lineIndex];
             bool isFirstAyahInSurah = false;
 
-            // Check if this line contains the first Ayah of a new Surah
             if (line.ayahs.isNotEmpty) {
               if (line.ayahs[0].ayahNumber == 1 &&
                   !newSurahs.contains(line.ayahs[0].surahNameAr)) {
@@ -255,16 +216,14 @@ class QuranSinglePageWidget extends StatelessWidget {
               }
             }
 
-            // Calculate available height based on orientation
             double availableHeight = (orientation == Orientation.portrait
                 ? constraints.maxHeight
                 : deviceSize.width);
 
-            // Adjust height offset if new Surahs (and their headers) are present on the page
             double surahHeaderOffset = (page.numberOfNewSurahs *
                 (line.ayahs.isNotEmpty && line.ayahs[0].surahNumber != 9
                     ? 110
-                    : 80)); // Surah At-Tawbah (9) doesn't have a Basmallah
+                    : 80));
 
             int linesCount = page.lines.isNotEmpty ? page.lines.length : 1;
             double lineHeight =
@@ -272,7 +231,6 @@ class QuranSinglePageWidget extends StatelessWidget {
 
             return Column(
               children: [
-                // Render Surah Header and Basmallah if applicable
                 if (isFirstAyahInSurah && line.ayahs.isNotEmpty) ...[
                   surahHeaderBuilder?.call(
                     context,
@@ -280,7 +238,6 @@ class QuranSinglePageWidget extends StatelessWidget {
                   ) ??
                       SurahHeaderWidget(suraNumber: line.ayahs[0].surahNumber),
 
-                  // Surah 9 (At-Tawbah) does not start with a Basmallah
                   if (line.ayahs[0].surahNumber != 9)
                     basmallahBuilder?.call(
                       context,
@@ -289,7 +246,6 @@ class QuranSinglePageWidget extends StatelessWidget {
                         BasmallahWidget(line.ayahs[0].surahNumber),
                 ],
 
-                // Render the line of text
                 SizedBox(
                   width: deviceSize.width - 32,
                   height: lineHeight > 0 ? lineHeight : 40,
@@ -311,18 +267,14 @@ class QuranSinglePageWidget extends StatelessWidget {
 
   /// Builds an individual line of Quranic text.
   Widget _buildQuranLine(Line line, Size deviceSize, BoxFit boxFit) {
+    // تم إزالة الـ ValueListenableBuilder وتمرير الـ highlights مباشرة
     return RepaintBoundary(
-      child: ValueListenableBuilder<List<HighlightVerse>>(
-        valueListenable: highlightsNotifier,
-        builder: (context, highlights, _) {
-          return QuranLine(
-            line,
-            highlights,
-            boxFit: boxFit,
-            onLongPress: onLongPress,
-            ayahStyle: ayahStyle,
-          );
-        },
+      child: QuranLine(
+        line,
+        highlights,
+        boxFit: boxFit,
+        onLongPress: onLongPress,
+        ayahStyle: ayahStyle,
       ),
     );
   }
