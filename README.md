@@ -12,14 +12,14 @@ Designed for professional Islamic applications, this package provides a fully of
 
 ## 📸 Screenshots
 
-<p align="center">
-  <img width="250" alt="Screenshot_20260304_165118" src="[https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f](https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f)" />
-  <img width="250" alt="Screenshot_20260304_165147" src="[https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08](https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08)" />
-</p>
-<p align="center">
-  <img width="250"  alt="Screenshot_20260304_165210" src="[https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b](https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b)" />
-  <img width="250" alt="Screenshot_20260304_165812" src="[https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd](https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd)" />
-</p>
+  <p align="center">
+  <img width="250" alt="Screenshot_20260304_165118" src="https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f" />
+  <img width="250" alt="Screenshot_20260304_165147" src="https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08" />
+  </p>
+  <p align="center">
+  <img width="250"  alt="Screenshot_20260304_165210" src="https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b" />
+  <img width="250" alt="Screenshot_20260304_165812" src="https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd" />
+  </p>
 
 ---
 
