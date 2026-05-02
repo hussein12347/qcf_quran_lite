@@ -1,7 +1,8 @@
 name: qcf_quran_lite
-description: Lightweight offline Quran package with Hafs font.
+description: Lightweight, offline Flutter Quran package using QCF Hafs font. Build professional Islamic apps with Mushaf rendering, smart search, UI highlights, and rich metadata.
 homepage: https://github.com/hussein12347/qcf_quran_lite/?tab=readme-ov-file
-version: 0.0.3
+#5-2-2026
+version: 0.0.4
 
 environment:
   sdk: ">=3.0.0 <4.0.0"

@@ -1,4 +1,3 @@
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
@@ -122,7 +121,6 @@ class QuranSurahListView extends StatelessWidget {
               .replaceAll(RegExp(r'\s+'), ' ')
               .trim();
 
-          // التحقق من الـ Highlights باستخدام الليست العادية
           final isHighlighted = highlights.any(
                 (h) => h.surah == surahNumber && h.verseNumber == verseNumber,
           );

@@ -7,59 +7,100 @@ import '../models/quran_page.dart';
 import '../services/get_page.dart';
 import 'bsmallah_widget.dart';
 
-/// A highly customizable, high-performance widget to display pages of the Holy Quran.
+/// A highly customizable, production-ready widget to display pages of the Holy Quran.
 class QuranPageView extends StatefulWidget {
-  /// Controls the pages of the Quran.
   final PageController pageController;
-
-  /// Callback triggered when the page changes. Returns the current page number.
   final Function(int)? onPageChanged;
-
-  /// A normal list of verses that should be highlighted.
   final List<HighlightVerse> highlights;
 
-  /// An optional widget to be displayed at the top of the Quran pages.
-  final Widget? topBar;
-
-  /// An optional widget to be displayed at the bottom of the Quran pages.
-  final Widget? bottomBar;
-
-  /// Callback triggered when a user long-presses on a verse.
-  /// Provides the [surahNumber], [verseNumber], and touch [details].
-  final void Function(
-      int surahNumber,
-      int verseNumber,
-      LongPressStartDetails details,
-      )? onLongPress;
-
-  /// Total number of pages to load. Defaults to the standard 604 pages.
-  final int quranPagesCount;
-
-  /// Custom builder for the Surah header.
+  // ================= UI BUILDERS =================
+  final Widget Function(BuildContext context, int pageIndex)? topBarBuilder;
+  final Widget Function(BuildContext context, int pageIndex)? bottomBarBuilder;
+  final Widget Function(BuildContext context, Widget pageContent)? pageBackgroundBuilder;
   final Widget Function(BuildContext context, int surahNumber)? surahHeaderBuilder;
-
-  /// Custom builder for the Basmallah (Bismillah) widget.
   final Widget Function(BuildContext context, int surahNumber)? basmallahBuilder;
 
-  /// Custom text style for the ayahs (verses).
-  final TextStyle? ayahStyle;
+  /// A custom builder to fully control the background decoration of the highlighted verse.
+  final Decoration Function(Color highlightColor)? customHighlightDecoration;
 
-  /// Background color for the Quran pages. Defaults to [Colors.transparent].
+  // ================= TAP GESTURES =================
+  /// Triggered when a tap is fully completed.
+  final void Function(int surahNumber, int verseNumber)? onTap;
+  /// Triggered when the user's finger first touches the screen. Provides coordinates.
+  final void Function(int surahNumber, int verseNumber, TapDownDetails details)? onTapDown;
+  /// Triggered when the user's finger lifts off the screen. Provides coordinates.
+  final void Function(int surahNumber, int verseNumber, TapUpDetails details)? onTapUp;
+  /// Triggered if the tap is canceled (e.g., the user touched but then scrolled).
+  final void Function(int surahNumber, int verseNumber)? onTapCancel;
+
+  // ================= DOUBLE TAP GESTURES =================
+  /// Triggered on a rapid double tap.
+  final void Function(int surahNumber, int verseNumber)? onDoubleTap;
+  /// Triggered when the user touches down for a double tap.
+  final void Function(int surahNumber, int verseNumber, TapDownDetails details)? onDoubleTapDown;
+  /// Triggered if the double tap gesture is interrupted.
+  final void Function(int surahNumber, int verseNumber)? onDoubleTapCancel;
+
+  // ================= LONG PRESS GESTURES =================
+  /// Triggered when a long press is recognized.
+  final void Function(int surahNumber, int verseNumber)? onLongPress;
+  /// Triggered the moment a long press starts. Provides coordinates.
+  final void Function(int surahNumber, int verseNumber, LongPressStartDetails details)? onLongPressStart;
+  /// Triggered when the user moves their finger during a long press.
+  final void Function(int surahNumber, int verseNumber, LongPressMoveUpdateDetails details)? onLongPressMoveUpdate;
+  /// Triggered when the user lifts their finger after a long press.
+  final void Function(int surahNumber, int verseNumber)? onLongPressUp;
+  /// Triggered when the long press ends. Provides velocity details.
+  final void Function(int surahNumber, int verseNumber, LongPressEndDetails details)? onLongPressEnd;
+  /// Triggered if the long press is canceled by the system.
+  final void Function(int surahNumber, int verseNumber)? onLongPressCancel;
+
+  // ================= BEHAVIOR, PHYSICS & STYLING =================
+  final int quranPagesCount;
+  final Axis scrollDirection;
+  final bool pageSnapping;
+  final ScrollPhysics? physics;
+  final TextDirection textDirection;
+  final TextStyle? ayahStyle;
   final Color? pageBackgroundColor;
+  final EdgeInsetsGeometry pagePadding;
+  final EdgeInsetsGeometry? highlightPadding;
+  final BorderRadiusGeometry? highlightBorderRadius;
 
   const QuranPageView({
     super.key,
     required this.pageController,
     this.onPageChanged,
-    this.highlights = const [], // تحولت لليست عادية بقيمة افتراضية
-    this.onLongPress,
-    this.quranPagesCount = 604,
-    this.topBar,
-    this.bottomBar,
+    this.highlights = const [],
+    this.topBarBuilder,
+    this.bottomBarBuilder,
+    this.pageBackgroundBuilder,
     this.surahHeaderBuilder,
     this.basmallahBuilder,
+    this.customHighlightDecoration,
+    this.onTap,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTapCancel,
+    this.onDoubleTap,
+    this.onDoubleTapDown,
+    this.onDoubleTapCancel,
+    this.onLongPress,
+    this.onLongPressStart,
+    this.onLongPressMoveUpdate,
+    this.onLongPressUp,
+    this.onLongPressEnd,
+    this.onLongPressCancel,
+    this.quranPagesCount = 604,
+    this.scrollDirection = Axis.horizontal,
+    this.pageSnapping = true,
+    this.physics = const BouncingScrollPhysics(),
+    this.textDirection = TextDirection.rtl,
     this.ayahStyle,
     this.pageBackgroundColor,
+    this.pagePadding = const EdgeInsets.symmetric(horizontal: 8.0, vertical: 4.0),
+    this.highlightPadding,
+    this.highlightBorderRadius,
   });
 
   @override
@@ -75,11 +116,9 @@ class _QuranPageViewState extends State<QuranPageView> {
     _loadQuranData();
   }
 
-  /// Fetches and processes the Quran page data.
   void _loadQuranData() {
     final quranDataProcessor = GetPage();
     quranDataProcessor.getQuran(widget.quranPagesCount);
-
     setState(() {
       pages = quranDataProcessor.staticPages;
     });
@@ -88,68 +127,130 @@ class _QuranPageViewState extends State<QuranPageView> {
   @override
   Widget build(BuildContext context) {
     return Directionality(
-      textDirection: TextDirection.rtl,
+      textDirection: widget.textDirection,
       child: Container(
         color: widget.pageBackgroundColor ?? Colors.transparent,
-        child: Column(
-          children: [
-            if (widget.topBar != null) widget.topBar!,
-            Expanded(
-              child: PageView.builder(
-                physics: const BouncingScrollPhysics(),
-                itemCount: pages.length,
-                controller: widget.pageController,
-                onPageChanged: (pageIndex) {
-                  if (widget.onPageChanged != null) {
-                    widget.onPageChanged!(pageIndex + 1);
-                  }
-                },
-                itemBuilder: (ctx, index) {
-                  final int pageNum = index + 1;
+        child: PageView.builder(
+          scrollDirection: widget.scrollDirection,
+          pageSnapping: widget.pageSnapping,
+          physics: widget.physics,
+          itemCount: pages.length,
+          controller: widget.pageController,
+          onPageChanged: (pageIndex) {
+            if (widget.onPageChanged != null) {
+              widget.onPageChanged!(pageIndex + 1);
+            }
+          },
+          itemBuilder: (ctx, index) {
+            final int pageNum = index + 1;
 
-                  return QuranSinglePageWidget(
-                    key: PageStorageKey('page_$pageNum'),
-                    page: pages[index],
-                    pageIndex: pageNum,
-                    highlights: widget.highlights, // تمرير الليست العادية
-                    onLongPress: widget.onLongPress,
-                    pageController: widget.pageController,
-                    surahHeaderBuilder: widget.surahHeaderBuilder,
-                    basmallahBuilder: widget.basmallahBuilder,
-                    ayahStyle: widget.ayahStyle,
-                  );
-                },
+            Widget pageContent = QuranSinglePageWidget(
+              key: PageStorageKey('page_$pageNum'),
+              page: pages[index],
+              pageIndex: pageNum,
+              highlights: widget.highlights,
+              // Pass all gestures down
+              onTap: widget.onTap,
+              onTapDown: widget.onTapDown,
+              onTapUp: widget.onTapUp,
+              onTapCancel: widget.onTapCancel,
+              onDoubleTap: widget.onDoubleTap,
+              onDoubleTapDown: widget.onDoubleTapDown,
+              onDoubleTapCancel: widget.onDoubleTapCancel,
+              onLongPress: widget.onLongPress,
+              onLongPressStart: widget.onLongPressStart,
+              onLongPressMoveUpdate: widget.onLongPressMoveUpdate,
+              onLongPressUp: widget.onLongPressUp,
+              onLongPressEnd: widget.onLongPressEnd,
+              onLongPressCancel: widget.onLongPressCancel,
+              // Other configurations
+              pageController: widget.pageController,
+              surahHeaderBuilder: widget.surahHeaderBuilder,
+              basmallahBuilder: widget.basmallahBuilder,
+              ayahStyle: widget.ayahStyle,
+              pagePadding: widget.pagePadding,
+              highlightPadding: widget.highlightPadding,
+              highlightBorderRadius: widget.highlightBorderRadius,
+              customHighlightDecoration: widget.customHighlightDecoration,
+            );
+
+            if (widget.pageBackgroundBuilder != null) {
+              pageContent = widget.pageBackgroundBuilder!(context, pageContent);
+            }
+
+            return Padding(
+              padding: widget.pagePadding,
+              child: Column(
+                children: [
+                  if (widget.topBarBuilder != null) widget.topBarBuilder!(context, pageNum),
+                  Expanded(child: pageContent),
+                  if (widget.bottomBarBuilder != null) widget.bottomBarBuilder!(context, pageNum),
+                ],
               ),
-            ),
-            if (widget.bottomBar != null) widget.bottomBar!,
-          ],
+            );
+          },
         ),
       ),
     );
   }
 }
 
-/// A specialized, internal widget that renders a single full page of the Quran.
+/// A specialized internal widget that renders a single full page of the Quran.
 class QuranSinglePageWidget extends StatelessWidget {
   final QuranPage page;
   final int pageIndex;
-  final List<HighlightVerse> highlights; // تحولت لليست عادية
-  final void Function(int, int, LongPressStartDetails)? onLongPress;
+  final List<HighlightVerse> highlights;
   final PageController pageController;
   final Widget Function(BuildContext context, int surahNumber)? surahHeaderBuilder;
   final Widget Function(BuildContext context, int surahNumber)? basmallahBuilder;
   final TextStyle? ayahStyle;
+  final EdgeInsetsGeometry pagePadding;
+  final EdgeInsetsGeometry? highlightPadding;
+  final BorderRadiusGeometry? highlightBorderRadius;
+  final Decoration Function(Color highlightColor)? customHighlightDecoration;
+
+  // Gestures
+  final void Function(int, int)? onTap;
+  final void Function(int, int, TapDownDetails)? onTapDown;
+  final void Function(int, int, TapUpDetails)? onTapUp;
+  final void Function(int, int)? onTapCancel;
+  final void Function(int, int)? onDoubleTap;
+  final void Function(int, int, TapDownDetails)? onDoubleTapDown;
+  final void Function(int, int)? onDoubleTapCancel;
+  final void Function(int, int)? onLongPress;
+  final void Function(int, int, LongPressStartDetails)? onLongPressStart;
+  final void Function(int, int, LongPressMoveUpdateDetails)? onLongPressMoveUpdate;
+  final void Function(int, int)? onLongPressUp;
+  final void Function(int, int, LongPressEndDetails)? onLongPressEnd;
+  final void Function(int, int)? onLongPressCancel;
 
   const QuranSinglePageWidget({
     super.key,
     required this.page,
     required this.pageIndex,
-    this.highlights = const [], // قيمة افتراضية
-    this.onLongPress,
+    this.highlights = const [],
     required this.pageController,
     this.surahHeaderBuilder,
     this.basmallahBuilder,
     this.ayahStyle,
+    required this.pagePadding,
+    this.highlightPadding,
+    this.highlightBorderRadius,
+    this.customHighlightDecoration,
+    // Gestures
+    this.onTap,
+    this.onTapDown,
+    this.onTapUp,
+    this.onTapCancel,
+    this.onDoubleTap,
+    this.onDoubleTapDown,
+    this.onDoubleTapCancel,
+    this.onLongPress,
+    this.onLongPressStart,
+    this.onLongPressMoveUpdate,
+    this.onLongPressUp,
+    this.onLongPressEnd,
+    this.onLongPressCancel,
   });
 
   @override
@@ -157,45 +258,36 @@ class QuranSinglePageWidget extends StatelessWidget {
     final deviceSize = MediaQuery.of(context).size;
     final orientation = MediaQuery.of(context).orientation;
 
-    return SizedBox(
-      height: deviceSize.height,
-      child: (pageIndex == 1 || pageIndex == 2)
-          ? _buildFirstTwoPages(context, deviceSize)
-          : _buildStandardPage(context, deviceSize, orientation),
-    );
+    // تم إزالة SizedBox(height: deviceSize.height) و Center
+    // لأن Expanded في الصفحة الرئيسية يقوم بتوفير المساحة الدقيقة المتبقية
+    // بين الـ TopBar والـ BottomBar.
+    return (pageIndex == 1 || pageIndex == 2)
+        ? _buildFirstTwoPages(context, deviceSize)
+        : _buildStandardPage(context, deviceSize, orientation);
   }
 
   Widget _buildFirstTwoPages(BuildContext context, Size deviceSize) {
     return Center(
       child: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (page.ayahs.isNotEmpty)
-                surahHeaderBuilder?.call(context, page.ayahs[0].surahNumber) ??
-                    SurahHeaderWidget(suraNumber: page.ayahs[0].surahNumber),
-
-              if (page.pageNumber == 2 && page.ayahs.isNotEmpty)
-                basmallahBuilder?.call(context, page.ayahs[0].surahNumber) ??
-                    BasmallahWidget(page.ayahs[0].surahNumber),
-
-              ...page.lines.map(
-                    (line) => _buildQuranLine(line, deviceSize, BoxFit.scaleDown),
-              ),
-            ],
-          ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            if (page.ayahs.isNotEmpty)
+              surahHeaderBuilder?.call(context, page.ayahs[0].surahNumber) ??
+                  SurahHeaderWidget(suraNumber: page.ayahs[0].surahNumber),
+            if (page.pageNumber == 2 && page.ayahs.isNotEmpty)
+              basmallahBuilder?.call(context, page.ayahs[0].surahNumber) ??
+                  BasmallahWidget(page.ayahs[0].surahNumber),
+            ...page.lines.map(
+                  (line) => _buildQuranLine(line, deviceSize, BoxFit.scaleDown),
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildStandardPage(
-      BuildContext context,
-      Size deviceSize,
-      Orientation orientation,
-      ) {
+  Widget _buildStandardPage(BuildContext context, Size deviceSize, Orientation orientation) {
     List<String> newSurahs = [];
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -216,45 +308,30 @@ class QuranSinglePageWidget extends StatelessWidget {
               }
             }
 
-            double availableHeight = (orientation == Orientation.portrait
-                ? constraints.maxHeight
-                : deviceSize.width);
-
-            double surahHeaderOffset = (page.numberOfNewSurahs *
-                (line.ayahs.isNotEmpty && line.ayahs[0].surahNumber != 9
-                    ? 110
-                    : 80));
-
+            double availableHeight = (orientation == Orientation.portrait ? constraints.maxHeight : deviceSize.width);
+            double surahHeaderOffset = (page.numberOfNewSurahs * (line.ayahs.isNotEmpty && line.ayahs[0].surahNumber != 9 ? 110 : 80));
             int linesCount = page.lines.isNotEmpty ? page.lines.length : 1;
-            double lineHeight =
-                (availableHeight - surahHeaderOffset) * 0.95 / linesCount;
+
+            // تم إزالة `* 0.95` لكي يتم توزيع مساحة الأسطر بالتساوي
+            // وتملأ الصفحة بالكامل لأسفل دون ترك فراغ ميت.
+            double lineHeight = (availableHeight - surahHeaderOffset) / linesCount;
 
             return Column(
               children: [
                 if (isFirstAyahInSurah && line.ayahs.isNotEmpty) ...[
-                  surahHeaderBuilder?.call(
-                    context,
-                    line.ayahs[0].surahNumber,
-                  ) ??
+                  surahHeaderBuilder?.call(context, line.ayahs[0].surahNumber) ??
                       SurahHeaderWidget(suraNumber: line.ayahs[0].surahNumber),
-
                   if (line.ayahs[0].surahNumber != 9)
-                    basmallahBuilder?.call(
-                      context,
-                      line.ayahs[0].surahNumber,
-                    ) ??
+                    basmallahBuilder?.call(context, line.ayahs[0].surahNumber) ??
                         BasmallahWidget(line.ayahs[0].surahNumber),
                 ],
-
                 SizedBox(
-                  width: deviceSize.width - 32,
+                  width: deviceSize.width,
                   height: lineHeight > 0 ? lineHeight : 40,
                   child: _buildQuranLine(
                     line,
                     deviceSize,
-                    line.ayahs.isNotEmpty && line.ayahs.last.centered
-                        ? BoxFit.scaleDown
-                        : BoxFit.fill,
+                    line.ayahs.isNotEmpty && line.ayahs.last.centered ? BoxFit.scaleDown : BoxFit.fill,
                   ),
                 ),
               ],
@@ -265,16 +342,29 @@ class QuranSinglePageWidget extends StatelessWidget {
     );
   }
 
-  /// Builds an individual line of Quranic text.
   Widget _buildQuranLine(Line line, Size deviceSize, BoxFit boxFit) {
-    // تم إزالة الـ ValueListenableBuilder وتمرير الـ highlights مباشرة
     return RepaintBoundary(
       child: QuranLine(
         line,
         highlights,
         boxFit: boxFit,
-        onLongPress: onLongPress,
         ayahStyle: ayahStyle,
+        highlightPadding: highlightPadding,
+        highlightBorderRadius: highlightBorderRadius,
+        onTap: onTap,
+        onTapDown: onTapDown,
+        onTapUp: onTapUp,
+        onTapCancel: onTapCancel,
+        onDoubleTap: onDoubleTap,
+        onDoubleTapDown: onDoubleTapDown,
+        onDoubleTapCancel: onDoubleTapCancel,
+        onLongPress: onLongPress,
+        onLongPressStart: onLongPressStart,
+        customHighlightDecoration: customHighlightDecoration,
+        onLongPressMoveUpdate: onLongPressMoveUpdate,
+        onLongPressUp: onLongPressUp,
+        onLongPressEnd: onLongPressEnd,
+        onLongPressCancel: onLongPressCancel,
       ),
     );
   }
