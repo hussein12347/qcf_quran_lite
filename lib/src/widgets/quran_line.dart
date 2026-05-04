@@ -114,7 +114,7 @@ class QuranLine extends StatelessWidget {
                       ? customHighlightDecoration!(highlight.color)
                       : BoxDecoration(
                     borderRadius: highlightBorderRadius ?? BorderRadius.circular(4.0),
-                    color: highlight.color.withOpacity(0.4),
+                    color: highlight.color.withValues(alpha: 0.4)
                   ))
                       : null,
                   child: Text(

@@ -48,7 +48,7 @@ class HighlightVerse {
       'surah': surah,
       'page': page,
       // Store the color as an integer value for easy serialization
-      'color': color.value,
+      'color': color.toARGB32(),
     };
   }
 
@@ -65,7 +65,7 @@ class HighlightVerse {
 
   @override
   String toString() =>
-      'HighlightVerse(surah: $surah, verseNumber: $verseNumber, page: $page, color: ${color.value})';
+      'HighlightVerse(surah: $surah, verseNumber: $verseNumber, page: $page, color: ${color.toARGB32()})';
 
   @override
   bool operator ==(Object other) {
@@ -74,10 +74,10 @@ class HighlightVerse {
         other.surah == surah &&
         other.verseNumber == verseNumber &&
         other.page == page &&
-        other.color.value == color.value;
+        other.color.toARGB32() == color.toARGB32();
   }
 
   @override
   int get hashCode =>
-      surah.hashCode ^ verseNumber.hashCode ^ page.hashCode ^ color.value.hashCode;
+      surah.hashCode ^ verseNumber.hashCode ^ page.hashCode ^ color.toARGB32().hashCode;
 }
