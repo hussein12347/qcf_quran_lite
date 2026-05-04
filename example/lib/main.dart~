@@ -30,6 +30,7 @@ class MyApp extends StatelessWidget {
           title: 'QCF Quran Lite Demo',
           debugShowCheckedModeBanner: false,
           builder: (context, child) {
+            // ضمان أن التطبيق بالكامل يعمل من اليمين لليسار (RTL)
             return Directionality(
               textDirection: TextDirection.rtl,
               child: child!,
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
               bodyLarge: TextStyle(color: Color(0xFF212121)),
               bodyMedium: TextStyle(color: Color(0xFF5D4037)),
             ),
-            fontFamily: 'Cairo',
+            fontFamily: 'Cairo', // استخدم خط يدعم العربية للواجهة
           ),
           // --- Dark Theme ---
           darkTheme: ThemeData(
@@ -88,7 +89,7 @@ class MyApp extends StatelessWidget {
 }
 
 // =============================================================================
-// Dashboard Screen
+// Dashboard Screen (Search, Stats, and Navigation)
 // =============================================================================
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -385,7 +386,7 @@ class _MushafScreenState extends State<MushafScreen> {
     }
   }
 
-  /// Temporarily highlights a verse for 3 seconds
+  /// Temporarily highlights a verse for a few seconds
   void _triggerTemporaryHighlight(int surah, int ayah, int page) {
     final highlightColor = Theme.of(context).brightness == Brightness.dark
         ? const Color(0xFFD4AF37) // Gold in dark mode
@@ -556,15 +557,15 @@ class _MushafScreenState extends State<MushafScreen> {
           pagePadding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
           highlightPadding: const EdgeInsets.symmetric(horizontal: 6.0, vertical: 2.0),
 
-          // 🌟 الميزة الجديدة: بناء ستايل تظليل احترافي بدلاً من مجرد خلفية سادة 🌟
+          // 🌟 Custom Highlight Decoration API in action 🌟
           customHighlightDecoration: (highlightColor) {
             return BoxDecoration(
-              color: highlightColor.withOpacity(0.15), // خلفية شفافة ومريحة للعين
+              color: highlightColor.withOpacity(0.15), // Light transparent fill
               border: Border.all(
-                color: highlightColor, // تحديد أطراف واضح وأنيق
+                color: highlightColor, // Solid border
                 width: 1.5,
               ),
-              borderRadius: BorderRadius.circular(8.0), // حواف دائرية حديثة
+              borderRadius: BorderRadius.circular(8.0), // Rounded corners
             );
           },
 
@@ -572,7 +573,7 @@ class _MushafScreenState extends State<MushafScreen> {
           // Creates a dynamic top bar that scrolls with the page
           topBarBuilder: (context, pageIndex) {
             return Padding(
-              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0),
+              padding: const EdgeInsets.only(left: 16.0, right: 16.0, top: 12.0, bottom: 8.0),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -585,7 +586,7 @@ class _MushafScreenState extends State<MushafScreen> {
           // Creates a dynamic bottom bar for the page number
           bottomBarBuilder: (context, pageIndex) {
             return Padding(
-              padding: const EdgeInsets.only(bottom: 12.0),
+              padding: const EdgeInsets.only(top: 8.0, bottom: 12.0),
               child: Center(
                 child: Text('$pageIndex', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Theme.of(context).colorScheme.primary)),
               ),
@@ -595,7 +596,6 @@ class _MushafScreenState extends State<MushafScreen> {
           pageBackgroundBuilder: (context, pageContent) {
             return Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.02),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: pageContent,
@@ -621,7 +621,7 @@ class _MushafScreenState extends State<MushafScreen> {
 }
 
 // =============================================================================
-// Surah List Reader Screen (Remains mostly unchanged)
+// Surah List Reader Screen
 // =============================================================================
 class SurahListReaderScreen extends StatefulWidget {
   final int initialSurah;

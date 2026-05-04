@@ -1,4 +1,3 @@
-````md
 # 🕌 qcf_quran_lite
 
 [![Pub Version](https://img.shields.io/pub/v/qcf_quran_lite?color=blue&style=flat-square)](https://pub.dev/packages/qcf_quran_lite)
@@ -21,8 +20,9 @@ It adds only ~10MB to your app size while providing full Mushaf rendering, smart
 </p>
 
 <p align="center">
-  <img width="250" alt="Screenshot_20260304_165210" src="https://github.com/user-attachments/assets/8352b9e6-1b3a-43a0-b185-3e08076cf59b" />
-  <img width="250" alt="Screenshot_20260304_165812" src="https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd" />
+   <img width="250" alt="Screenshot_20260304_165800" src="https://github.com/user-attachments/assets/f650db8b-a7a2-4b4f-addb-e2367384dd61" />
+
+   <img width="250" alt="Screenshot_20260304_165812" src="https://github.com/user-attachments/assets/72d2aaaf-cfd1-44ad-af6d-64ba8f9767dd" />
 </p>
 
 ---
@@ -67,16 +67,16 @@ final PageController _controller = PageController(initialPage: 0);
 List<HighlightVerse> _activeHighlights = [];
 
 QuranPageView(
-  pageController: _controller,
-  scaffoldKey: GlobalKey<ScaffoldState>(),
-  highlights: _activeHighlights,
-  onPageChanged: (pageNumber) {
-    print("User navigated to page: $pageNumber");
-    print(getCurrentHizbTextForPage(pageNumber));
-  },
-  onLongPress: (surahNumber, verseNumber, details) {
-    print("Tapped Surah: $surahNumber, Verse: $verseNumber");
-  },
+pageController: _controller,
+scaffoldKey: GlobalKey<ScaffoldState>(),
+highlights: _activeHighlights,
+onPageChanged: (pageNumber) {
+print("User navigated to page: $pageNumber");
+print(getCurrentHizbTextForPage(pageNumber));
+},
+onLongPress: (surahNumber, verseNumber, details) {
+print("Tapped Surah: $surahNumber, Verse: $verseNumber");
+},
 );
 ```
 
@@ -271,4 +271,4 @@ MIT License
 > Built with ❤️ for high-quality Quran applications.
 
 ```
-```
+
