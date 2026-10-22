@@ -16,6 +16,8 @@ It adds only ~10MB to your app size while providing full Mushaf rendering (singl
 
 <p align="center">
   <img width="250" alt="Screenshot_20260304_165118" src="https://github.com/user-attachments/assets/54df12fb-be44-4389-b091-82ce5917e45f" />
+  <img width="250" alt="image" src="https://github.com/user-attachments/assets/372c8b5f-3aff-40bc-a6d0-a1515407608f" />
+
   <img width="250" alt="Screenshot_20260304_165147" src="https://github.com/user-attachments/assets/99a8e173-c12c-4914-9afd-038b1e688a08" />
 </p>
 
